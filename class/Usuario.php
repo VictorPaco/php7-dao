@@ -29,7 +29,8 @@ class Usuario{
     public function setDtcadastro($value){
         $this->dtcadastro = $value;
     }
-    
+
+    //TRAS APENAS 1 USUARIO
     public function loadById($id){
         $sql = new Sql();
         $results = $sql->select("SELECT * FROM tb_usuarios WHERE idusuario = :ID", 
@@ -42,6 +43,36 @@ class Usuario{
             $this->setDtcadastro(new DateTime($row['dtcadastro']));
         }
     }
+
+    //TRAS UMA LISTA DE TODOS OS USUARIOS
+    public static function getList(){
+        $sql = new Sql();
+        return $sql->select("SELECT * FROM tb_usuarios ORDER BY deslogin;");
+    }
+    
+    //TRAS UMA PESQUISA POR PARTE DO LOGIN
+    public static function search($Login){
+        $sql = new Sql();
+        return $sql->select("SELECT * FROM tb_usuarios WHERE deslogin LIKE :SEARCH ORDER BY deslogin", array(':SEARCH'=>"%".$Login."%"));
+
+    }
+
+    public function login($Login, $password){
+        $sql = new Sql();
+        $results = $sql->select("SELECT * FROM tb_usuarios WHERE deslogin = :LOGIN AND dessenha = :PASSWORD", 
+        array(":LOGIN"=>$Login, ":PASSWORD"=>$password));
+        if(count($results) > 0){
+            $row = $results[0];
+            $this->setIdusuario($row['idusuario']);
+            $this->setDeslogin($row['deslogin']);
+            $this->setDessenha($row['dessenha']);
+            $this->setDtcadastro(new DateTime($row['dtcadastro']));
+        } else{
+            throw new Exception("Login e/ou Senha Inválidos!");            
+        }
+    }
+
+    //CONVERTE OS DADOS EM STRING PARA PODER VIZUALISAR
     public function __toString(){
         return json_encode(array(
             "idusuario"=>$this->getIdusuario(),
